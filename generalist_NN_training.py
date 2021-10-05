@@ -8,6 +8,7 @@ import os
 import numpy as np
 
 
+
 def init_population(pop_size, num_vars):
     # Init population of uniformly sampled networks.
     pop = np.random.uniform(-1, 1, (pop_size, num_vars))
@@ -24,7 +25,6 @@ def eval_population(pop, enemies=[1], trials=1):
         fitnesses.append(fitness)
         
     return np.array(fitnesses)
-
 
 def eval_individual(genome, enemy, trials):
     # Set up environment.
@@ -48,7 +48,7 @@ def eval_individual(genome, enemy, trials):
     
     return fitness / trials, gain / trials
 
-
+# proportional selection + windowing
 def parent_selection(pop, fitnesses, num_parents):
     # Fitness proportional selection + windowing
     fitnesses = np.copy(fitnesses) - np.min(fitnesses)
@@ -56,8 +56,18 @@ def parent_selection(pop, fitnesses, num_parents):
 
     # Select parent indices
     i = np.random.choice(np.arange(pop.shape[0]), size=num_parents, p=pvals)
-
     return pop[i]
+
+
+# tournament parent selection
+def parent_selection_tournament(pop: object, fitnesses, k=3):
+    fitnesses = np.copy(fitnesses) - np.min(fitnesses)
+    select_index = np.randint(len(pop))
+    for ix in np.randint(0, len(pop), k-1):
+        # tournament: select the better one
+        if fitnesses[ix] < fitnesses[select_index]:
+            select_index = ix
+    return pop[select_index]
 
 
 def recombine_parents(parents, num_offspring):

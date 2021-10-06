@@ -63,7 +63,8 @@ def parent_selection(population, fitnesses, num_parents):
     fitnesses = np.copy(fitnesses) - np.min(fitnesses)
 
     #mating_pool_inx_inx = random_proportinal_parent_selection(population, fitnesses, num_parents)
-    mating_pool_inx_inx = parent_selection_tournament(population, fitnesses, num_parents)
+    #mating_pool_inx_inx = parent_selection_tournament(population, fitnesses, num_parents)
+    mating_pool_inx_inx = parent_selection_fitness_sharing(population, fitnesses, num_parents)
     mating_pool = population[mating_pool_inx_inx]
     return mating_pool
 
@@ -89,6 +90,39 @@ def parent_selection_tournament(population, fitnesses, num_parents, K=3):
         mating_pool_inx.append(select_index)
     return mating_pool_inx
 
+# Fitness sharing parent selection:
+# Modern genetic algorithms usually devote a lot of effort to maintaining the diversity
+# of the population to prevent premature convergence. One technique for that is fitness sharing.
+# The inclusion of the fitness sharing technique in the evolutionary algorithm allows the extent to which
+# the canonical genetic code is in an area corresponding to a deep local minimum to be easily determined,
+# even in the high dimensional spaces considered.
+def parent_selection_fitness_sharing(population, fitnesses, num_parents):
+    mating_pool_inx = []
+    for i in 0, num_parents - 1 :
+        candidate_size = 2;
+        candidate_A_inx = np.random.randint(POP_SIZE - 1)
+        candidate_B_inx = np.random.randint(POP_SIZE - 1)
+        candidates_inx = [candidate_A_inx, candidate_B_inx]
+        distances = np.zeros((candidate_size,), dtype=np.float64)
+        for e, i in enumerate(candidates_inx):
+            distances[e] = niches_count(i, fitnesses)
+        # to maintain good diversity, best to choose the individual with smaller niche count.
+        item_index = np.where(distances == distances.min())[0][0]
+        candidate_index = candidates_inx[item_index]
+        mating_pool_inx.append(candidate_index)
+    return mating_pool_inx
+
+
+def niches_count(candidate_index, fitnesses,  niche_radius = 1):
+    niche_count = 0
+    for ind in range(POP_SIZE - 1):
+        distance = np.linalg.norm(fitnesses[candidate_index] - fitnesses[ind])
+        if distance <= niche_radius:
+            sharing_func = 1.0 - (distance / niche_radius)
+        else:
+            sharing_func = 0
+        niche_count = niche_count + sharing_func
+    return niche_count
 
 def recombine_parents(parents, num_offspring):
     # Copy parents just in case....

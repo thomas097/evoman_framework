@@ -16,20 +16,30 @@ def init_population(pop_size, num_vars):
 
 
 # Evaluates each genome in the population.
-def eval_population(envs, pop, fitness_func, trials=1):
-    fitnesses = []
+def eval_population(pop, fitness_func, enemies, trials=1):
+    pop_fitnesses = []
     for ind in tqdm(pop):
 
         # Average fitness over enemies.
-        fitness = 0
-        for env in envs:
-            fitness += eval_individual(env, ind, fitness_func, trials)[0]
-        fitnesses.append(fitness / len(envs))
+        ind_fitness = 0
+        for enemy in enemies:
+            ind_fitness += eval_individual(ind, fitness_func, enemy, trials)[0]
+        pop_fitnesses.append(ind_fitness / len(enemies))
 
-    return np.array(fitnesses)
+    return np.array(pop_fitnesses)
 
 
-def eval_individual(env, genome, fitness_func, trials):
+def eval_individual(genome, fitness_func, enemy, trials):
+    # Set up environment.
+    env = Environment(experiment_name=None,
+                      enemies=[enemy],
+                      player_controller=player_controller(_n_hidden=10),
+                      contacthurt='player',
+                      speed='fastest',
+                      logs="off",
+                      randomini='yes',
+                      level=2)
+
     fitnesses, gains = [], []
     for _ in range(trials):
         fitness, player_en, enemy_en, _ = env.play(pcont=genome)
@@ -214,28 +224,14 @@ if __name__ == "__main__":
     NUM_OUTPUTS = 5
     NUM_VARS = (NUM_INPUTS + 1) * NUM_HIDDEN + (NUM_HIDDEN + 1) * NUM_OUTPUTS
 
-
-    ###################
-    ## Run evolution!
-    ###################
-
     # Do not show screen
     if not SHOW:
         os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-    # Set up an environment for each enemy.
-    envs = []
-    for enemy in ENEMIES:
-        envs.append(Environment(experiment_name=None,
-                                enemies=[enemy],
-                                player_controller=player_controller(_n_hidden=10),
-                                contacthurt='player',
-                                speed='fastest',
-                                logs="off",
-                                randomini='yes',
-                                level=2))
+    ###################
+    ### Run evolution!
+    ###################
 
-    # Perform several runs.
     for run in range(RUNS):
 
         # Init stats logger
@@ -243,20 +239,15 @@ if __name__ == "__main__":
 
         # Set up and evaluate initial population
         pop = init_population(POP_SIZE, NUM_VARS)
-        pop_fitnesses = eval_population(envs, pop, FITNESS, trials=TRIALS)
-        
+        pop_fitnesses = eval_population(pop, FITNESS, ENEMIES, trials=TRIALS)
         logger.log(pop_fitnesses)
 
-        # Evolutionary cycle
         for gen in range(GENS):
+            # Evolutionary cycle
             parents = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
-
             offspring = recombine_parents(parents, NUM_OFFSPRING)
-
             offspring = mutate_offspring(offspring)
-
-            offspring_fitnesses = eval_population(envs, offspring, FITNESS, trials=TRIALS)
-            
+            offspring_fitnesses = eval_population(offspring, FITNESS, ENEMIES, trials=TRIALS)
             pop, pop_fitnesses = survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses)
 
             logger.log(pop_fitnesses)

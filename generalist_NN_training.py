@@ -142,8 +142,8 @@ class Logger:
     """
     def __init__(self, run, enemies, fitness):
         # Set up file with header.
-        self.stat_fname = "stats_run-{}_enemies-{}_fitness-{}".format(run, enemies, fitness)
-        with open(self.stat_fname + ".csv", "w") as f:
+        self.stats_fname = "stats_run-{}_enemies-{}_fitness-{}".format(run, enemies, fitness)
+        with open(self.stats_fname + ".csv", "w") as f:
             f.write("mean,max\n")
 
     def log(self, pop_fitnesses):
@@ -151,7 +151,7 @@ class Logger:
         mean = np.mean(pop_fitnesses)
         _max = np.max(pop_fitnesses)
 
-        with open(self.stat_fname + ".csv", "a") as f:
+        with open(self.stats_fname + ".csv", "a") as f:
             f.write("{},{}\n".format(mean, _max))
 
         print("Stats: MEAN={} MAX={}".format(mean, _max))
@@ -161,7 +161,7 @@ class Logger:
         i = np.argmax(pop_fitnesses)
         solution = pop[i]
 
-        solution_fname = self.stat_fname.replace("stats", "best")
+        solution_fname = self.stats_fname.replace("stats", "best")
         np.savetxt(solution_fname + ".txt", solution)
         
 

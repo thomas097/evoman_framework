@@ -9,20 +9,24 @@ import numpy as np
 
 
 
+# Init population of uniformly sampled networks.
 def init_population(pop_size, num_vars):
-    # Init population of uniformly sampled networks.
     pop = np.random.uniform(-1, 1, (pop_size, num_vars))
     return pop
 
 
+# Evaluates each genome in the population.
 def eval_population(pop, fitness_func, enemies, trials=1):
-    fitnesses = []
-    # Evaluate each genome in the population.
-    for genome in tqdm(pop):
-        fitness = np.mean([eval_individual(genome, fitness_func, e, trials)[0] for e in enemies]) # [0] as [1] is gain
-        fitnesses.append(fitness)
+    pop_fitnesses = []
+    for ind in tqdm(pop):
         
-    return np.array(fitnesses)
+        # Average fitness over enemies.
+        ind_fitness = 0
+        for enemy in enemies:
+            ind_fitness += eval_individual(ind, fitness_func, enemy, trials)[0]
+        pop_fitnesses.append(ind_fitness / len(enemies))
+        
+    return np.array(pop_fitnesses)
 
 
 def eval_individual(genome, fitness_func, enemy, trials):
@@ -56,11 +60,13 @@ def eval_individual(genome, fitness_func, enemy, trials):
 
 # proportional selection + windowing
 def parent_selection(pop, fitnesses, num_parents):
-    # Fitness proportional selection + windowing
+    # Windowing
     fitnesses = np.copy(fitnesses) - np.min(fitnesses)
+
+    # Fitness proportional selection
     pvals = fitnesses / np.sum(fitnesses)
 
-    # Select parent indices
+    # Sample parentas
     i = np.random.choice(np.arange(pop.shape[0]), size=num_parents, p=pvals)
     return pop[i]
 
@@ -77,8 +83,8 @@ def parent_selection_tournament(pop: object, fitnesses, k=3):
 
 
 def recombine_parents(parents, num_offspring):
-    # Copy just in case....
-    parent = np.copy(parents)
+    # Copy parents just in case....
+    parents = np.copy(parents)
     
     offspring = []
     for _ in range(num_offspring // 2 + 1):
@@ -105,10 +111,12 @@ def recombine_parents(parents, num_offspring):
     return np.array(offspring)[:num_offspring]
 
 
+
 def mutate_offspring(offspring):
     # Just add a smidge of random Gaussian noise.
     noise = np.random.normal(0, 1, offspring.shape)
     return offspring + 0.2 * noise
+
 
 
 def survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses):
@@ -142,10 +150,11 @@ class Logger:
         # Print population statistics.
         mean = np.mean(pop_fitnesses)
         _max = np.max(pop_fitnesses)
-        print("Stats: MEAN={} MAX={}".format(mean, _max))
 
         with open(self.stat_fname + ".csv", "a") as f:
             f.write("{},{}\n".format(mean, _max))
+
+        print("Stats: MEAN={} MAX={}".format(mean, _max))
 
     def save_best(self, pop, pop_fitnesses):
         # Save best solution from population.

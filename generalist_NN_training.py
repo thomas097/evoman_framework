@@ -50,24 +50,42 @@ def eval_individual(genome, enemy, trials):
 
 # proportional selection + windowing
 def parent_selection(pop, fitnesses, num_parents):
-    # Fitness proportional selection + windowing
+    # Windowing
     fitnesses = np.copy(fitnesses) - np.min(fitnesses)
+
+    # Fitness proportional selection
     pvals = fitnesses / np.sum(fitnesses)
 
-    # Select parent indices
+    # Sample parentas
     i = np.random.choice(np.arange(pop.shape[0]), size=num_parents, p=pvals)
     return pop[i]
 
+#    selected_parents_inx = random_proportinal_parent_selection(population, fitnesses, num_parents)
+    mating_pool_inx_inx = parent_selection_tournament(population, fitnesses, num_parents)
+    mating_pool = population[mating_pool_inx_inx]
+    return mating_pool
 
-# tournament parent selection
-def parent_selection_tournament(pop: object, fitnesses, k=3):
+# proportional selection + windowing
+def random_proportinal_parent_selection(pop, fitnesses, num_parents):
     fitnesses = np.copy(fitnesses) - np.min(fitnesses)
-    select_index = np.randint(len(pop))
-    for ix in np.randint(0, len(pop), k-1):
-        # tournament: select the better one
-        if fitnesses[ix] < fitnesses[select_index]:
-            select_index = ix
-    return pop[select_index]
+    pvals = fitnesses / np.sum(fitnesses)
+    mating_pool_inx = np.random.choice(np.arange(pop.shape[0]), size=num_parents, p=pvals)
+    return mating_pool_inx
+
+# K-Way tournament selection:
+# 1) random select K individuals from the population at random
+# 2) select the best out of these to become a parent.
+# 3) repeat for selecting the next parent.
+# Tournament Selection is also extremely popular in literature as it can even work with negative fitness values.
+def parent_selection_tournament(population, fitnesses, num_parents, K=3):
+    select_index = np.random.choice(len(population))
+    mating_pool_inx = []
+    for i in 0, num_parents-1 :
+        for ix in np.random.randint(0, len(pop), K-1):
+            if fitnesses[ix] < fitnesses[select_index]:
+                select_index = ix
+        mating_pool_inx.append(select_index)
+    return mating_pool_inx
 
 
 def recombine_parents(parents, num_offspring):

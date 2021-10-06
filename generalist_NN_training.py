@@ -15,38 +15,44 @@ def init_population(pop_size, num_vars):
     return pop
 
 
-def eval_population(pop, enemies=[1], trials=1):
+def eval_population(pop, fitness_func, enemies, trials=1):
     fitnesses = []
     # Evaluate each genome in the population.
     for genome in tqdm(pop):
-        
-        # Compute fitness as the average over enemy group.
-        fitness = np.mean([eval_individual(genome, e, trials)[0] for e in enemies]) # [0] as [1] is gain
+        fitness = np.mean([eval_individual(genome, fitness_func, e, trials)[0] for e in enemies]) # [0] as [1] is gain
         fitnesses.append(fitness)
         
     return np.array(fitnesses)
 
-def eval_individual(genome, enemy, trials):
+
+def eval_individual(genome, fitness_func, enemy, trials):
     # Set up environment.
     env = Environment(experiment_name=None,
                       enemies=[enemy],
-                      player_controller=player_controller(10), # magic number = hidden neurons
+                      player_controller=player_controller(_n_hidden=10), 
                       contacthurt='player',
                       speed='fastest',
                       logs = "off",
                       randomini='yes',
                       level=2)
     
-    # Run enemy in environment and compute fitness/gain.
-    fitness, gain = 0, 0
+    fitnesses, gains = [], []
     for _ in range(trials):
-        trial_fitness, player_en, enemy_en, _ = env.play(pcont=genome)
-        trial_gain = player_en - enemy_en
-        
-        fitness += trial_fitness
-        gain += trial_gain
-    
-    return fitness / trials, gain / trials
+        fitness, player_en, enemy_en, _ = env.play(pcont=genome)
+
+        # Original fitness function
+        if fitness_func == 1:
+            fitnesses.append(fitness)
+
+        # Alternative fitness function
+        elif fitness_func == 2:
+            fitnesses.append(0) # TODO: implement other fitness function
+
+        gains.append(player_en - enemy_en)
+
+    return np.mean(fitnesses), np.mean(gains)
+
+
 
 # proportional selection + windowing
 def parent_selection(pop, fitnesses, num_parents):
@@ -105,7 +111,7 @@ def mutate_offspring(offspring):
     return offspring + 0.2 * noise
 
 
-def fight_to_the_death(pop, pop_fitnesses, offspring, offspring_fitnesses):
+def survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses):
     # Combine offspring and old population
     total_pop = np.vstack([pop, offspring])
     total_fitnesses = np.hstack([pop_fitnesses, offspring_fitnesses])
@@ -118,18 +124,53 @@ def fight_to_the_death(pop, pop_fitnesses, offspring, offspring_fitnesses):
     # Deterministic competition for survivl (mu + lambda) style.
     pop_size = pop.shape[0]
     return total_pop[:pop_size], total_fitnesses[:pop_size]
-    
+
+
+
+
+class Logger:
+    """ Convenience class to log the mean and max fitness of
+        genotypes in the population over the course of a run.
+    """
+    def __init__(self, run, enemies, fitness):
+        # Set up file with header.
+        self.stat_fname = "stats_run-{}_enemies-{}_fitness-{}".format(run, enemies, fitness)
+        with open(self.stat_fname + ".csv", "w") as f:
+            f.write("mean,max\n")
+
+    def log(self, pop_fitnesses):
+        # Print population statistics.
+        mean = np.mean(pop_fitnesses)
+        _max = np.max(pop_fitnesses)
+        print("Stats: MEAN={} MAX={}".format(mean, _max))
+
+        with open(self.stat_fname + ".csv", "a") as f:
+            f.write("{},{}\n".format(mean, _max))
+
+    def save_best(self, pop, pop_fitnesses):
+        # Save best solution from population.
+        i = np.argmax(pop_fitnesses)
+        solution = pop[i]
+
+        solution_fname = self.stat_fname.replace("stats", "best")
+        np.savetxt(solution_fname + ".txt", solution)
+        
+
 
 
 if __name__ == "__main__":
+    # Program params
+    RUNS = 1
+    FITNESS = 1 # or 2 (Daniyal)
+    SHOW = False
+    
     # EA params
-    POP_SIZE = 100
-    GENS = 100
-    TRIALS = 3
+    POP_SIZE = 10
+    GENS = 1
+    TRIALS = 1
     NUM_PARENTS = 15
     NUM_OFFSPRING = 15
     ENEMIES = [1, 2, 3]
-    SHOW = False
 
     # Network params
     NUM_INPUTS = 20
@@ -141,28 +182,33 @@ if __name__ == "__main__":
     if not SHOW:
         os.environ["SDL_VIDEODRIVER"] = "dummy"
 
+
+    ###################
     ### Run evolution!
+    ###################
+        
+    for run in range(RUNS):
 
-    # Init and evaluate population.
-    pop = init_population(POP_SIZE, NUM_VARS)
-    pop_fitnesses = eval_population(pop, ENEMIES, trials=TRIALS)
-    
-    for gen in range(GENS):
-        # Select parents
-        parents = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
+        # Init stats logger
+        logger = Logger(run, ENEMIES, FITNESS)
 
-        # Recombine parents -> offspring
-        offspring = recombine_parents(parents, NUM_OFFSPRING)
+        # Set up and evaluate initial population
+        pop = init_population(POP_SIZE, NUM_VARS)
+        pop_fitnesses = eval_population(pop, FITNESS, ENEMIES, trials=TRIALS)
+        logger.log(pop_fitnesses)
+        
+        for gen in range(GENS):
+            # Evolutionary cycle
+            parents = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
+            offspring = recombine_parents(parents, NUM_OFFSPRING)
+            offspring = mutate_offspring(offspring)
+            offspring_fitnesses = eval_population(offspring, FITNESS, ENEMIES, trials=TRIALS)
+            pop, pop_fitnesses = survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses)
+            
+            logger.log(pop_fitnesses)
 
-        # Mutate offspring
-        offspring = mutate_offspring(offspring)
-
-        # Evaluate kiddos.
-        offspring_fitnesses = eval_population(offspring, ENEMIES, trials=TRIALS)
-
-        # Survival selection
-        pop, pop_fitnesses = fight_to_the_death(pop, pop_fitnesses, offspring, offspring_fitnesses)
-        print("Stats: MEAN={}, MAX={}".format(np.mean(pop_fitnesses), np.max(pop_fitnesses)))
+        # Write best solution to file.
+        logger.save_best(pop, pop_fitnesses)
         
 
         

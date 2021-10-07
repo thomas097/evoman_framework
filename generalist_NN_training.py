@@ -175,7 +175,7 @@ def recombine_parents(parents, num_offspring):
 
 def mutate_offspring(offspring):
     # Just add a smidge of random Gaussian noise.
-    noise = np.random.normal(0, 1, offspring.shape)
+    noise = np.random.normal(0, 2, offspring.shape)
     return offspring + noise
 
 
@@ -232,7 +232,7 @@ class Logger:
 
 if __name__ == "__main__":
     # Program params
-    RUNS = 10
+    RUNS = 1
     FITNESS = 1  # or 2
 
     # EA params

@@ -268,15 +268,15 @@ if __name__ == "__main__":
 
         for gen in range(GENS):
             # Parent selection
-            parents = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
+            par = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
 
             # Reproduction
-            offspring = recombine_parents(parents, NUM_OFFSPRING)
-            offspring = mutate_offspring(offspring)
-            offspring_fitnesses = eval_population(offspring, FITNESS, ENEMIES, num_trials=TRIALS)
+            off = recombine_parents(par, NUM_OFFSPRING)
+            off = mutate_offspring(off)
+            off_fitnesses = eval_population(off, FITNESS, ENEMIES, num_trials=TRIALS)
 
             # Replacement
-            pop, pop_fitnesses = survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses)
+            pop, pop_fitnesses = survivor_selection(pop, pop_fitnesses, off, off_fitnesses)
             logger.log(pop_fitnesses)
 
         # Write best solution to file.

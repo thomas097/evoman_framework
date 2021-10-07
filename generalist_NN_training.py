@@ -28,12 +28,12 @@ def eval_population(pop, fitness_func, enemies, num_trials=1):
     pop_fitnesses = []
     for ind in tqdm(pop):
 
-        # Average fitness over enemies and trials.
-        fitnesses = []
+        # Average fitness over x trials for y enemies.
+        ind_fitness = []
         for enemy in enemies:
             for _ in range(num_trials):
-                fitnesses.append( eval_individual(ind, fitness_func, enemy)[0] )
-        pop_fitnesses.append(np.mean(fitnesses))
+                ind_fitness.append( eval_individual(ind, fitness_func, enemy)[0] )
+        pop_fitnesses.append(np.mean(ind_fitness))
 
     return np.array(pop_fitnesses)
 
@@ -85,7 +85,7 @@ def random_proportinal_parent_selection(pop, fitnesses, num_parents):
     mating_pool_inx = np.random.choice(np.arange(pop.shape[0]), size=num_parents, p=pvals)
     return mating_pool_inx
 
-# K-Way tournament selection:
+# Deterministic K-Way tournament selection:
 # 1) random select K individuals from the population at random
 # 2) select the best out of these to become a parent.
 # 3) repeat for selecting the next parent.
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     # EA params
     POP_SIZE = 100
     GENS = 30
-    TRIALS = 5
+    TRIALS = 4
     NUM_PARENTS = 20
     NUM_OFFSPRING = 20
     ENEMIES = [1, 2, 3]

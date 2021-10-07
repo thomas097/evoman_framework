@@ -1,11 +1,11 @@
-import sys
+import sys, os
 
 sys.path.insert(0, 'evoman')
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+
 from environment import Environment
 from demo_controller import player_controller
 from tqdm import tqdm
-
-import os
 import numpy as np
 
 
@@ -39,7 +39,7 @@ def eval_population(pop, fitness_func, enemies, num_trials=1):
 
 
 def eval_individual(genome, fitness_func, enemy):
-    # Set up environment.
+    # Set up environment for enemy.
     env = Environment(experiment_name=None,
                       enemies=[enemy],
                       player_controller=player_controller(_n_hidden=10),
@@ -49,6 +49,7 @@ def eval_individual(genome, fitness_func, enemy):
                       randomini='yes',
                       level=2)
 
+    # Run game.
     game_fitness, player_en, enemy_en, _ = env.play(pcont=genome)
     gain = player_en - enemy_en
 
@@ -58,7 +59,7 @@ def eval_individual(genome, fitness_func, enemy):
 
     # Alternative fitness function
     elif fitness_func == 2:
-        fitness = 0 
+        fitness = 0 # TODO: Daniyal
 
     return fitness, gain
 
@@ -175,7 +176,7 @@ def recombine_parents(parents, num_offspring):
 def mutate_offspring(offspring):
     # Just add a smidge of random Gaussian noise.
     noise = np.random.normal(0, 1, offspring.shape)
-    return offspring + 0.2 * noise
+    return offspring + noise
 
 
 ##############################
@@ -216,31 +217,28 @@ class Logger:
         # Print population statistics.
         mean = np.mean(pop_fitnesses)
         _max = np.max(pop_fitnesses)
+        print("Stats: MEAN={} MAX={}".format(mean, _max))
 
+        # Write stats to file.
         with open(self.stats_fname + ".csv", "a") as f:
             f.write("{},{}\n".format(mean, _max))
 
-        print("Stats: MEAN={} MAX={}".format(mean, _max))
-
     def save_best(self, pop, pop_fitnesses):
-        # Save best solution from population.
-        i = np.argmax(pop_fitnesses)
-        solution = pop[i]
-
+        # Write best solution to file.
+        solution = pop[np.argmax(pop_fitnesses)]
         solution_fname = self.stats_fname.replace("stats", "best")
         np.savetxt(solution_fname + ".txt", solution)
 
 
 if __name__ == "__main__":
     # Program params
-    RUNS = 1
-    FITNESS = 1  # or 2 (Daniyal)
-    SHOW = False
+    RUNS = 10
+    FITNESS = 1  # or 2
 
     # EA params
     POP_SIZE = 100
-    GENS = 30
-    TRIALS = 4
+    GENS = 50
+    TRIALS = 5
     NUM_PARENTS = 20
     NUM_OFFSPRING = 20
     ENEMIES = [1, 2, 3]
@@ -251,13 +249,12 @@ if __name__ == "__main__":
     NUM_OUTPUTS = 5
     NUM_VARS = (NUM_INPUTS + 1) * NUM_HIDDEN + (NUM_HIDDEN + 1) * NUM_OUTPUTS
 
-    # Do not show screen
-    if not SHOW:
-        os.environ["SDL_VIDEODRIVER"] = "dummy"
-
-    ###################
+    ####################
     ### Run evolution!
-    ###################
+    ####################
+
+    # Do not show screen
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
 
     for run in range(RUNS):
 
@@ -265,22 +262,20 @@ if __name__ == "__main__":
         logger = Logger(run, ENEMIES, FITNESS)
 
         # Set up and evaluate initial population
-        pop = init_population(POP_SIZE, NUM_VARS)
-        
+        pop = init_population(POP_SIZE, NUM_VARS) 
         pop_fitnesses = eval_population(pop, FITNESS, ENEMIES, num_trials=TRIALS)
         logger.log(pop_fitnesses)
 
-        # Evolutionary loop
         for gen in range(GENS):
-            
+            # Parent selection
             parents = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
-            
+
+            # Reproduction
             offspring = recombine_parents(parents, NUM_OFFSPRING)
-            
             offspring = mutate_offspring(offspring)
-            
             offspring_fitnesses = eval_population(offspring, FITNESS, ENEMIES, num_trials=TRIALS)
 
+            # Replacement
             pop, pop_fitnesses = survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses)
             logger.log(pop_fitnesses)
 

@@ -9,27 +9,36 @@ import os
 import numpy as np
 
 
+##############################
+## Initialization
+##############################
+
 # Init population of uniformly sampled networks.
 def init_population(pop_size, num_vars):
     pop = np.random.uniform(-1, 1, (pop_size, num_vars))
     return pop
 
 
+##############################
+## Evaluation
+##############################
+
 # Evaluates each genome in the population.
-def eval_population(pop, fitness_func, enemies, trials=1):
+def eval_population(pop, fitness_func, enemies, num_trials=1):
     pop_fitnesses = []
     for ind in tqdm(pop):
 
-        # Average fitness over enemies.
-        ind_fitness = 0
+        # Average fitness over enemies and trials.
+        fitnesses = []
         for enemy in enemies:
-            ind_fitness += eval_individual(ind, fitness_func, enemy, trials)[0]
-        pop_fitnesses.append(ind_fitness / len(enemies))
+            for _ in range(num_trials):
+                fitnesses.append( eval_individual(ind, fitness_func, enemy)[0] )
+        pop_fitnesses.append(np.mean(fitnesses))
 
     return np.array(pop_fitnesses)
 
 
-def eval_individual(genome, fitness_func, enemy, trials):
+def eval_individual(genome, fitness_func, enemy):
     # Set up environment.
     env = Environment(experiment_name=None,
                       enemies=[enemy],
@@ -40,22 +49,23 @@ def eval_individual(genome, fitness_func, enemy, trials):
                       randomini='yes',
                       level=2)
 
-    fitnesses, gains = [], []
-    for _ in range(trials):
-        fitness, player_en, enemy_en, _ = env.play(pcont=genome)
+    game_fitness, player_en, enemy_en, _ = env.play(pcont=genome)
+    gain = player_en - enemy_en
 
-        # Original fitness function
-        if fitness_func == 1:
-            fitnesses.append(fitness)
+    # Original fitness function
+    if fitness_func == 1:
+        fitness = game_fitness
 
-        # Alternative fitness function
-        elif fitness_func == 2:
-            fitnesses.append(0)  # TODO: implement other fitness function
+    # Alternative fitness function
+    elif fitness_func == 2:
+        fitness = 0 
 
-        gains.append(player_en - enemy_en)
+    return fitness, gain
 
-    return np.mean(fitnesses), np.mean(gains)
 
+##############################
+## Parent Selection
+##############################
 
 # selection methods with windowing: random, tournament of fitness sharing
 def parent_selection(population, fitnesses, num_parents):
@@ -118,11 +128,16 @@ def niches_count(candidate_index, fitnesses,  niche_radius = 1):
     for ind in range(POP_SIZE - 1):
         distance = np.linalg.norm(fitnesses[candidate_index] - fitnesses[ind])
         if distance <= niche_radius:
-            sharing_func = 1.0 - (distance / niche_radius)
+            sharing_func = 1.0 - (distance / niche_radius) # Linear
         else:
             sharing_func = 0
         niche_count = niche_count + sharing_func
     return niche_count
+
+
+##############################
+## Recombination
+##############################
 
 def recombine_parents(parents, num_offspring):
     # Copy parents just in case....
@@ -153,11 +168,19 @@ def recombine_parents(parents, num_offspring):
     return np.array(offspring)[:num_offspring]
 
 
+##############################
+## Mutation
+##############################
+
 def mutate_offspring(offspring):
     # Just add a smidge of random Gaussian noise.
     noise = np.random.normal(0, 1, offspring.shape)
     return offspring + 0.2 * noise
 
+
+##############################
+## Survivor Selection
+##############################
 
 def survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses):
     # Combine offspring and old population
@@ -173,6 +196,10 @@ def survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses):
     pop_size = pop.shape[0]
     return total_pop[:pop_size], total_fitnesses[:pop_size]
 
+
+##############################
+## Utilities / Main loop
+##############################
 
 class Logger:
     """ Convenience class to log the mean and max fitness of
@@ -211,14 +238,14 @@ if __name__ == "__main__":
     SHOW = False
 
     # EA params
-    POP_SIZE = 10
-    GENS = 1
+    POP_SIZE = 100
+    GENS = 30
     TRIALS = 5
-    NUM_PARENTS = 15
-    NUM_OFFSPRING = 15
+    NUM_PARENTS = 20
+    NUM_OFFSPRING = 20
     ENEMIES = [1, 2, 3]
 
-    # Network params
+    # Network topology
     NUM_INPUTS = 20
     NUM_HIDDEN = 10
     NUM_OUTPUTS = 5
@@ -239,17 +266,22 @@ if __name__ == "__main__":
 
         # Set up and evaluate initial population
         pop = init_population(POP_SIZE, NUM_VARS)
-        pop_fitnesses = eval_population(pop, FITNESS, ENEMIES, trials=TRIALS)
+        
+        pop_fitnesses = eval_population(pop, FITNESS, ENEMIES, num_trials=TRIALS)
         logger.log(pop_fitnesses)
 
+        # Evolutionary loop
         for gen in range(GENS):
-            # Evolutionary cycle
+            
             parents = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
+            
             offspring = recombine_parents(parents, NUM_OFFSPRING)
+            
             offspring = mutate_offspring(offspring)
-            offspring_fitnesses = eval_population(offspring, FITNESS, ENEMIES, trials=TRIALS)
-            pop, pop_fitnesses = survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses)
+            
+            offspring_fitnesses = eval_population(offspring, FITNESS, ENEMIES, num_trials=TRIALS)
 
+            pop, pop_fitnesses = survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses)
             logger.log(pop_fitnesses)
 
         # Write best solution to file.

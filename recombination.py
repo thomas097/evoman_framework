@@ -11,18 +11,14 @@ def recombine_parents(parents, num_offspring):
         p0 = parents[0]
         p1 = parents[1]
 
-        # Determine crossover point.
-        xpoint = np.random.randint(low=1, high=p0.shape[0])
+        # Determine which alleles come from which parent.
+        m = np.uint8(np.random.random(p0.shape) < 0.5)
 
         # Create two kiddos.
-        off0 = np.zeros(p0.shape, dtype=np.float64)
-        off0[:xpoint] = p0[:xpoint]
-        off0[xpoint:] = p1[xpoint:]
+        off0 = p0 * m + p1 * (1 - m)
+        off1 = p1 * m + p0 * (1 - m)
+        
         offspring.append(off0)
-
-        off1 = np.zeros(p0.shape, dtype=np.float64)
-        off1[:xpoint] = p1[:xpoint]
-        off1[xpoint:] = p0[xpoint:]
         offspring.append(off1)
 
     # Really make sure its not more than num_offspring.

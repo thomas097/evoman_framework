@@ -45,15 +45,15 @@ def parent_selection_fitness_sharing(population, fitnesses, num_parents):
     pop_size = population.shape[0]
 
     mating_pool_inx = []
-    for i in range(0, num_parents - 1):
+    for i in 0, num_parents - 1:
         candidate_size = 2;
         candidate_A_inx = np.random.randint(pop_size - 1)
         candidate_B_inx = np.random.randint(pop_size - 1)
         candidates_inx = [candidate_A_inx, candidate_B_inx]
         
         distances = np.zeros((candidate_size,), dtype=np.float64)
-        for i, e in enumerate(candidates_inx):
-            distances[i] = niches_count(e, fitnesses)
+        for e, i in enumerate(candidates_inx):
+            distances[e] = niches_count(i, fitnesses)
             
         # to maintain good diversity, best to choose the individual with smaller niche count.
         item_index = np.where(distances == distances.min())[0][0]

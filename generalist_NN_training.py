@@ -17,15 +17,15 @@ from logger import Logger
 
 
 
-# Parameters
+# Params
 RUNS = 1
 FITNESS = 1  # or 2
 
 POP_SIZE = 100
-GENS = 10
-TRIALS = 2
-NUM_PARENTS = 10
-NUM_OFFSPRING = 10
+GENS = 20
+TRIALS = 5
+NUM_PARENTS = 20
+NUM_OFFSPRING = 20
 ENEMIES = [1, 2, 3]
 
 MIN_INIT = -1
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         # Init stats logger
         logger = Logger(run, ENEMIES, FITNESS)
 
-        # Set up and evaluate initial population
+        # Initialize and evaluate initial population
         pop = np.random.uniform(MIN_INIT, MAX_INIT, (POP_SIZE, NUM_VARS))
         pop_fitnesses = eval_population(pop, FITNESS, ENEMIES, num_trials=TRIALS)
         logger.log(pop_fitnesses)

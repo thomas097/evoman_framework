@@ -4,10 +4,10 @@ from scipy.spatial import distance_matrix
 
 def parent_selection(pop, fitnesses, num_parents):
     # Apply windowing
-    fitnesses -= np.min(fitnesses)
+    fitnesses = np.copy(fitnesses) - np.min(fitnesses)
 
     # Fitness sharing
-    #fitnesses = fitness_sharing(pop, fitnesses)
+    fitnesses = fitness_sharing(pop, fitnesses)
 
     # Fitness proportional selection
     pvals = fitnesses / np.sum(fitnesses)

@@ -18,7 +18,7 @@ def parent_selection(pop, fitnesses, num_parents):
     
 def fitness_sharing(pop, fitnesses):
     # Compute L1 distance between all population members i and j.
-    dist_mat = distance_matrix(pop, pop, p=1) # Genotypic
+    dists = distance_matrix(pop, pop, p=1) # Genotypic
     #dists = distance_matrix(fitnesses.reshape(-1, 1), fitnesses.reshape(-1, 1), p=1) # Fitness shape
     
     # Share fitnesses

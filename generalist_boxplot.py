@@ -17,7 +17,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind
 
-from generalist_NN_training import eval_individual
+from evaluation import eval_individual
 from demo_controller import player_controller
 
 

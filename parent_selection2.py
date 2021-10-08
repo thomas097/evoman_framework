@@ -7,7 +7,7 @@ def parent_selection(pop, fitnesses, num_parents):
     fitnesses -= np.min(fitnesses)
 
     # Fitness sharing
-    fitnesses = fitness_sharing(pop, fitnesses)
+    #fitnesses = fitness_sharing(pop, fitnesses)
 
     # Fitness proportional selection
     pvals = fitnesses / np.sum(fitnesses)

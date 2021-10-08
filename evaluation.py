@@ -1,0 +1,48 @@
+import sys, os
+sys.path.insert(0, 'evoman')
+from environment import Environment
+from demo_controller import player_controller
+from tqdm import tqdm
+import numpy as np
+
+
+# Evaluates each genome in the population.
+def eval_population(pop, fitness_func, enemies, num_trials=1):
+    pop_fitnesses = []
+    for ind in tqdm(pop):
+
+        # Average fitness over x trials for y enemies.
+        ind_fitness = []
+        for enemy in enemies:
+            for _ in range(num_trials):
+                ind_fitness.append( eval_individual(ind, fitness_func, enemy)[0] )
+        pop_fitnesses.append(np.mean(ind_fitness))
+
+    return np.array(pop_fitnesses)
+
+
+
+def eval_individual(genome, fitness_func, enemy):
+    # Set up environment for enemy.
+    env = Environment(experiment_name=None,
+                      enemies=[enemy],
+                      player_controller=player_controller(_n_hidden=10),
+                      contacthurt='player',
+                      speed='fastest',
+                      logs="off",
+                      randomini='yes',
+                      level=2)
+
+    # Run game.
+    game_fitness, player_en, enemy_en, _ = env.play(pcont=genome)
+    gain = player_en - enemy_en
+
+    # Original fitness function
+    if fitness_func == 1:
+        fitness = game_fitness
+
+    # Alternative fitness function
+    elif fitness_func == 2:
+        fitness = 0 # TODO: Daniyal
+
+    return fitness, gain

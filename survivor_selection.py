@@ -11,6 +11,6 @@ def survivor_selection(pop, pop_fitnesses, offspring, offspring_fitnesses):
     total_pop = total_pop[i]
     total_fitnesses = total_fitnesses[i]
 
-    # Deterministic competition for survivl (mu + lambda) style.
+    # Deterministic competition for survival (mu + lambda) style.
     pop_size = pop.shape[0]
     return total_pop[:pop_size], total_fitnesses[:pop_size]

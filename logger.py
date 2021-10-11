@@ -24,5 +24,6 @@ class Logger:
     def save_best(self, pop, pop_fitnesses):
         # Write best solution to file.
         solution = pop[np.argmax(pop_fitnesses)]
+        solution = solution[:265] # Strip sigma if exists
         solution_fname = self.stats_fname.replace("stats", "best")
         np.savetxt(solution_fname + ".txt", solution)

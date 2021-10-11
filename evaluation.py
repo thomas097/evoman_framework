@@ -4,7 +4,6 @@ from environment import Environment
 from demo_controller import player_controller
 from tqdm import tqdm
 import numpy as np
-import math
 
 
 # Evaluates each genome in the population.
@@ -27,15 +26,16 @@ def eval_individual(genome, fitness_func, enemy):
     # Set up environment for enemy.
     env = Environment(experiment_name=None,
                       enemies=[enemy],
-                      player_controller=player_controller(_n_hidden=10,self_adapt_sigma=1),
+                      player_controller=player_controller(_n_hidden=10),
                       contacthurt='player',
                       speed='fastest',
                       logs="off",
                       randomini='yes',
                       level=2)
 
-    # Run game.
-    game_fitness, player_energy, enemy_energy, time = env.play(pcont=genome)
+    # Run game with genome weights (exclude sigma).
+    weights = genome[:265]
+    game_fitness, player_energy, enemy_energy, time = env.play(pcont=weights)
     gain = player_energy - enemy_energy
 
     # Original fitness function
@@ -54,8 +54,7 @@ def fitness_1(player_energy, enemy_energy):
     remove the consideration of time from the original fitness function
     0.9(100-e) + 0.1p
     """
-    fitness = 0.9*(100-enemy_energy) + 0.1*(player_energy)
-    return fitness
+    return 0.9*(100-enemy_energy) + 0.1*(player_energy)
 
 
 def fitness_2(player_energy, enemy_energy, time):
@@ -63,5 +62,4 @@ def fitness_2(player_energy, enemy_energy, time):
     original fitness function
     0.9(100-e) + 0.1p -log t
     """
-    fitness = 0.9*(100-enemy_energy) + 0.1*(player_energy) - math.log(time)
-    return fitness
+    return 0.9*(100-enemy_energy) + 0.1*(player_energy) - np.log(time)

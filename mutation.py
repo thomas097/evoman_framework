@@ -6,12 +6,16 @@ import numpy as np
 #     noise = np.random.normal(0, 1, offspring.shape)
 #     return offspring + noise
 
-def mutate_offspring(offspring):
+def mutate_offspring(offspring, sigma_loc=-1):
+    # mutate sigma first
+    offspring[sigma_loc] += np.random.normal(0, np.abs(offspring[sigma_loc]))
+    mutated_sigma = np.abs(offspring[sigma_loc])
     # Add a little bit of self-adaptive noise (imperfect copy)
     if np.random.binomial(1, .1) == 1:
-        mutated_sigma = np.random.normal(1, .25)
         noise = np.random.normal(0, mutated_sigma, offspring.shape)
-        return offspring + noise*np.random.binomial(1, .15, offspring.shape)
+        offspring = offspring + noise*np.random.binomial(1, .15, offspring.shape)
+        offspring[sigma_loc] = mutated_sigma
+        return offspring
     # vars gets 0 (Quasi-Deletion)
     if np.random.binomial(1, .05) == 1:
         return offspring*np.random.binomial(1, .85, offspring.shape)

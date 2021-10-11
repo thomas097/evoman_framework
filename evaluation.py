@@ -27,7 +27,7 @@ def eval_individual(genome, fitness_func, enemy):
     # Set up environment for enemy.
     env = Environment(experiment_name=None,
                       enemies=[enemy],
-                      player_controller=player_controller(_n_hidden=10),
+                      player_controller=player_controller(_n_hidden=10,self_adapt_sigma=1),
                       contacthurt='player',
                       speed='fastest',
                       logs="off",

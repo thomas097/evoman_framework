@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('--outputs', help='output size of NN', default=5,type=int)
     parser.add_argument('--crossover', help='crossover type (1: uniform, 2: singlepoint, 3: multipoint)', default=1,type=int)
     parser.add_argument('--trials', help='number of trials', default=4,type=int)
-
+    parser.add_argument('--self_adapt_sigma', help="allow self adaption of noise sigma", default=1, type=int)
 
     args = parser.parse_args()
 
@@ -59,7 +59,10 @@ if __name__ == "__main__":
     NUM_HIDDEN = args.hidden
     NUM_OUTPUTS = args.outputs
     NUM_VARS = (NUM_INPUTS + 1) * NUM_HIDDEN + (NUM_HIDDEN + 1) * NUM_OUTPUTS
+    if args.self_adapt_sigma:
+        NUM_VARS += 1
     CROSSOVER = args.crossover
+
     for run in range(RUNS):
 
         # Init stats logger
@@ -67,6 +70,7 @@ if __name__ == "__main__":
 
         # Initialize and evaluate initial population
         pop = np.random.uniform(MIN_INIT, MAX_INIT, (POP_SIZE, NUM_VARS))
+        
         pop_fitnesses = eval_population(pop, FITNESS, ENEMIES, num_trials=TRIALS)
         logger.log(pop_fitnesses)
 

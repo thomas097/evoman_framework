@@ -22,14 +22,15 @@ from demo_controller import player_controller
 
 
 if __name__ == "__main__":
-    ENEMIES = [[1, 2, 3],
-               [1, 2, 3]]
+    TRAIN_ENEMIES = [[1, 2, 3],
+                     [1, 2, 3]]
+    TEST_ENEMIES = [1, 2, 3, 4, 5, 6, 7, 8]
     FITNESS_TYPES = [1, 2]
     RUNS = 10
     REPEATS = 5
 
-    for k, enemies in enumerate(ENEMIES):
-        print("Enemy group", enemies)
+    for k, train_enemies in enumerate(TRAIN_ENEMIES):
+        print("Enemy group:", train_enemies)
 
         run_gains = np.zeros((len(FITNESS_TYPES), len(RUNS)), dtype=float)
         
@@ -38,22 +39,23 @@ if __name__ == "__main__":
             # Loop through runs
             for j, run in enumerate(range(RUNS)):
 
-                filename = "best_run-{}_enemies-{}_fitness-{}.txt".format(run, enemies, fitness_type)
+                filename = "best_run-{}_enemies-{}_fitness-{}.txt".format(run, train_enemies, fitness_type)
                 ind = np.loadtxt(filename)
 
                 gains = []
-                for enemy in enemies:
+                for enemy in TEST_ENEMIES:
                     for _ in range(REPEATS):
                         _, gain = eval_individual(ind, fitness_type, enemy)
                         gains.append(gain)
+                        
                 avg_gain = np.mean(gains)
-
-                print(f'run {run}, enemies {enemies}, mean gain {avg_gain}')
                 run_gains[i, j] = avg_gain
+                print(f'run {run}, enemies {train_enemies}, mean gain {avg_gain}')
+         
 
         # Perform statistical Welch's t-test
         T, p = ttest_ind(run_gains[0], run_gains[1], equal_var=False)
-        print("enemies", enemies, "p =", p, "T =", T)
+        print("enemies", train_enemies, "p =", p, "T =", T)
 
         # Format plots
         plt.subplot(1, 3, k+1)
@@ -62,7 +64,7 @@ if __name__ == "__main__":
         plt.boxplot(run_gains.T, widths=(0.75, 0.75))
         plt.xticks([1, 2], ["EA1", "EA2"])
         plt.ylim((-20, 110))
-        plt.title("Enemies {}".format(enemy))
+        plt.title("Training enemies {}".format(enemy))
     plt.show()
     
 

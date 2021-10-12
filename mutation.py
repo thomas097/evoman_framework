@@ -5,6 +5,13 @@ import numpy as np
 #     # Just add a smidge of random Gaussian noise.
 #     noise = np.random.normal(0, 1, offspring.shape)
 #     return offspring + noise
+def mutate_offsprings(offsprings, prob = 0.2):
+    
+    for offspring in offsprings:
+        val = np.random.uniform()
+        if val <= 0.2:
+            offspring = mutate_offspring(offspring)
+    return offsprings
 
 def mutate_offspring(offspring, sigma_loc=-1, tau=1, eps=0.1):
     # mutate sigma first

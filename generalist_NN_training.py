@@ -11,8 +11,8 @@ import argparse
 # Import EA components
 from evaluation import eval_population
 from parent_selection2 import parent_selection
-from recombination import uniform_crossover, single_point_crossover, multi_point_crossover
-from mutation import mutate_offspring
+from recombination import uniform_crossover,single_point_crossover,multi_point_crossover
+from mutation import mutate_offsprings
 from survivor_selection import survivor_selection
 from logger import Logger
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # Parse arguments (if any are given)
     parser = argparse.ArgumentParser()
     parser.add_argument('--runs', help='number of runs per enemy', default=1, type = int)
-    parser.add_argument('--generations', help = 'number of generations EA will run', default=100,type=int)
+    parser.add_argument('--generations', help = 'number of generations EA will run', default=1,type=int)
     parser.add_argument('--fitness', help = 'which fitness function to use (1: without time. 2: with time)', default=1, type=int)
     parser.add_argument('--population_size', help='population in each generation', default=100,type=int)
     parser.add_argument('--parents', help='number of parents for reproduction', default=20,type=int)
@@ -42,16 +42,18 @@ if __name__ == "__main__":
     ENEMIES = [int(i) for i in str(args.enemies).split(',')]
     SELF_ADAPT = int(args.self_adapt_sigma)
 
-    # These are fixed by the assignment
-    MIN_INIT = -1
-    MAX_INIT = 1
-    NUM_INPUTS = 20
-    NUM_HIDDEN = 10
-    NUM_OUTPUTS = 5
-    NUM_VARS = (NUM_INPUTS + 1) * NUM_HIDDEN + (NUM_HIDDEN + 1) * NUM_OUTPUTS + SELF_ADAPT
-
+    MIN_INIT = args.min_init
+    MAX_INIT = args.max_init
+    NUM_INPUTS = args.inputs
+    NUM_HIDDEN = args.hidden
+    NUM_OUTPUTS = args.outputs
+    NUM_VARS = (NUM_INPUTS + 1) * NUM_HIDDEN + (NUM_HIDDEN + 1) * NUM_OUTPUTS
+    if args.self_adapt_sigma:
+        NUM_VARS += 1
+    CROSSOVER = args.crossover
+    print(args)
     for run in range(RUNS):
-
+        print(f'RUN: {run+1}')
         # Init stats logger
         logger = Logger(run, ENEMIES, FITNESS)
 
@@ -61,12 +63,15 @@ if __name__ == "__main__":
         logger.log(pop_fitnesses)
 
         for gen in range(GENS):
+            print(f'RUN: {run+1}||GENERATION: {gen+1}')
+            # print(gen)
             # Parent selection
             par = parent_selection(pop, pop_fitnesses, NUM_PARENTS)
 
             # Reproduction
-            off = uniform_crossover(par, NUM_OFFSPRING)
-            off = mutate_offspring(off)
+            off = crossover_dict[CROSSOVER](par, NUM_OFFSPRING)
+            # print(off.shape)
+            off = mutate_offsprings(off)
             off_fitnesses = eval_population(off, FITNESS, ENEMIES, num_trials=TRIALS)
 
             # Replacement

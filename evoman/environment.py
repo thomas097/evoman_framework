@@ -472,23 +472,23 @@ class Environment(object):
                     return
 
             # updates objects and draws its itens on screen
-            self.screen.fill((250,250,250))
+            # self.screen.fill((250,250,250))
             self.tilemap.update( 33 / 1000., self)
-            self.tilemap.draw(self.screen)
+            # self.tilemap.draw(self.screen)
 
             # player life bar
             vbar = int(100 *( 1-(self.player.life/float(self.player.max_life)) ))
-            pygame.draw.line(self.screen, (0,   0,   0), [40, 40],[140, 40], 2)
-            pygame.draw.line(self.screen, (0,   0,   0), [40, 45],[140, 45], 5)
-            pygame.draw.line(self.screen, (150,24,25),   [40, 45],[140 - vbar, 45], 5)
-            pygame.draw.line(self.screen, (0,   0,   0), [40, 49],[140, 49], 2)
+            # pygame.draw.line(self.screen, (0,   0,   0), [40, 40],[140, 40], 2)
+            # pygame.draw.line(self.screen, (0,   0,   0), [40, 45],[140, 45], 5)
+            # pygame.draw.line(self.screen, (150,24,25),   [40, 45],[140 - vbar, 45], 5)
+            # pygame.draw.line(self.screen, (0,   0,   0), [40, 49],[140, 49], 2)
 
             # enemy life bar
             vbar = int(100 *( 1-(self.enemy.life/float(self.enemy.max_life)) ))
-            pygame.draw.line(self.screen, (0,   0,   0), [590, 40],[695, 40], 2)
-            pygame.draw.line(self.screen, (0,   0,   0), [590, 45],[695, 45], 5)
-            pygame.draw.line(self.screen, (194,118,55),  [590, 45],[695 - vbar, 45], 5)
-            pygame.draw.line(self.screen, (0,   0,   0), [590, 49],[695, 49], 2)
+            # pygame.draw.line(self.screen, (0,   0,   0), [590, 40],[695, 40], 2)
+            # pygame.draw.line(self.screen, (0,   0,   0), [590, 45],[695, 45], 5)
+            # pygame.draw.line(self.screen, (194,118,55),  [590, 45],[695 - vbar, 45], 5)
+            # pygame.draw.line(self.screen, (0,   0,   0), [590, 49],[695, 49], 2)
 
 
             #gets fitness for training agents
@@ -507,9 +507,9 @@ class Environment(object):
 
                 myfont = pygame.font.SysFont("Comic sams", 100)
                 pygame.font.Font.set_bold
-                self.screen.blit(myfont.render("Player", 1,  (150,24,25)), (50, 180))
-                self.screen.blit(myfont.render("  VS  ", 1,  (50,24,25)), (250, 180))
-                self.screen.blit(myfont.render("Enemy "+str(self.enemyn), 1,  (194,118,55)), (400, 180))
+                # self.screen.blit(myfont.render("Player", 1,  (150,24,25)), (50, 180))
+                # self.screen.blit(myfont.render("  VS  ", 1,  (50,24,25)), (250, 180))
+                # self.screen.blit(myfont.render("Enemy "+str(self.enemyn), 1,  (194,118,55)), (400, 180))
 
 
             # checks player life status
@@ -520,7 +520,7 @@ class Environment(object):
                 if self.playermode == "human":
                     myfont = pygame.font.SysFont("Comic sams", 100)
                     pygame.font.Font.set_bold
-                    self.screen.blit(myfont.render(" Enemy wins", 1, (194,118,55)), (150, 180))
+                    # self.screen.blit(myfont.render(" Enemy wins", 1, (194,118,55)), (150, 180))
 
                 self.player.kill() # removes player sprite
                 self.enemy.kill()  # removes enemy sprite
@@ -538,13 +538,13 @@ class Environment(object):
                 ends -= 1
 
                 self.screen.fill((250,250,250))
-                self.tilemap.draw(self.screen)
+                # self.tilemap.draw(self.screen)
 
                 # tells user that player has won
                 if self.playermode == "human":
                     myfont = pygame.font.SysFont("Comic sams", 100)
                     pygame.font.Font.set_bold
-                    self.screen.blit(myfont.render(" Player wins ", 1, (150,24,25) ), (170, 180))
+                    # self.screen.blit(myfont.render(" Player wins ", 1, (150,24,25) ), (170, 180))
 
                 self.enemy.kill()   # removes enemy sprite
                 self.player.kill()  # removes player sprite

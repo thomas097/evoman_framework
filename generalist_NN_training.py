@@ -16,17 +16,24 @@ from mutation import mutate_offsprings
 from survivor_selection import survivor_selection
 from logger import Logger
 
+crossover_dict = {1: uniform_crossover, 2:single_point_crossover, 3:multi_point_crossover}
 
 if __name__ == "__main__":
     # Parse arguments (if any are given)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--runs', help='number of runs per enemy', default=1, type = int)
-    parser.add_argument('--generations', help = 'number of generations EA will run', default=1,type=int)
-    parser.add_argument('--fitness', help = 'which fitness function to use (1: without time. 2: with time)', default=1, type=int)
+    parser.add_argument('--runs', help='number of runs per enemy', default=10, type = int)
+    parser.add_argument('--generations', help = 'number of generations EA will run', default=75,type=int)
+    parser.add_argument('--fitness', help = 'which fitness function to use (1: without time. 2: with time)', default=2, type=int)
     parser.add_argument('--population_size', help='population in each generation', default=100,type=int)
     parser.add_argument('--parents', help='number of parents for reproduction', default=20,type=int)
     parser.add_argument('--offsprings', help='number of offsprings', default=20,type=int)
-    parser.add_argument('--enemies', help = 'comma separated types of enemies', default='1,2,3')
+    parser.add_argument('--enemies', help = 'comma separated types of enemies', default='2,3,4')
+    parser.add_argument('--min_init', help='minimum initializations', default=-1,type=int)
+    parser.add_argument('--max_init', help='maximum initialization', default=1,type=int)
+    parser.add_argument('--inputs', help='input size of NN', default=20,type=int)
+    parser.add_argument('--hidden', help='hidden layer size of NN', default=10,type=int)
+    parser.add_argument('--outputs', help='output size of NN', default=5,type=int)
+    parser.add_argument('--crossover', help='crossover type (1: uniform, 2: singlepoint, 3: multipoint)', default=1,type=int)
     parser.add_argument('--trials', help='number of trials', default=4,type=int)
     parser.add_argument('--self_adapt_sigma', help="allow self adaption of noise sigma", default=1, type=int)
     args = parser.parse_args()
@@ -48,9 +55,12 @@ if __name__ == "__main__":
     NUM_HIDDEN = args.hidden
     NUM_OUTPUTS = args.outputs
     NUM_VARS = (NUM_INPUTS + 1) * NUM_HIDDEN + (NUM_HIDDEN + 1) * NUM_OUTPUTS
+
     if args.self_adapt_sigma:
         NUM_VARS += 1
+
     CROSSOVER = args.crossover
+
     print(args)
     for run in range(RUNS):
         print(f'RUN: {run+1}')

@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument('--population_size', help='population in each generation', default=100,type=int)
     parser.add_argument('--parents', help='number of parents for reproduction', default=20,type=int)
     parser.add_argument('--offsprings', help='number of offsprings', default=20,type=int)
-    parser.add_argument('--enemies', help = 'comma separated types of enemies', default='2,3,4')
+    parser.add_argument('--enemies', help = 'comma separated types of enemies', default='1,5,7')
     parser.add_argument('--min_init', help='minimum initializations', default=-1,type=int)
     parser.add_argument('--max_init', help='maximum initialization', default=1,type=int)
     parser.add_argument('--inputs', help='input size of NN', default=20,type=int)

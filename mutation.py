@@ -9,7 +9,7 @@ def mutate_offsprings(offsprings, prob = 0.3, self_adapt_sigma=1):
     
     for offspring in offsprings:
         val = np.random.uniform()
-        if val <= prob:
+        if val <= 0.2:
             offspring = mutate_offspring(offspring, self_adapt_sigma)
     return offsprings
 
@@ -24,22 +24,23 @@ def mutate_offspring(offspring, sigma_loc=-1, tau=1, eps=0.1, self_adapt_sigma=1
     mutated_sigma = offspring[sigma_loc] if self_adapt_sigma else sigma
     
     # Add a little bit of self-adaptive noise (imperfect copy)
-    if np.random.binomial(1, .3) == 1:
+    if np.random.binomial(1, .1) == 1:
         noise = np.random.normal(0, mutated_sigma, offspring.shape)
         offspring = offspring + noise*np.random.binomial(1, .15, offspring.shape)
-        offspring[sigma_loc] = mutated_sigma
+        if self_adapt_sigma:
+            offspring[sigma_loc] = mutated_sigma
         return offspring
     
     # vars gets 0
-    if np.random.binomial(1, .2) == 1:
+    if np.random.binomial(1, .05) == 1:
         return offspring*np.random.binomial(1, .85, offspring.shape)
     
     # Swap Coefficient
-    if np.random.binomial(1, .2) == 1:
+    if np.random.binomial(1, .05) == 1:
         return offspring*(np.random.binomial(1, .85, offspring.shape)*2-1)
 
     # vars gets 1
-    if np.random.binomial(1, .2) == 1:
+    if np.random.binomial(1, .05) == 1:
         return offspring**np.random.binomial(1, .85, offspring.shape)
     return offspring
 

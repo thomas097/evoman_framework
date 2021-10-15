@@ -81,9 +81,9 @@ if __name__ == "__main__":
             # Reproduction
             off = crossover_dict[CROSSOVER](par, NUM_OFFSPRING)
             # print(off.shape)
-            mutation_rate = 0.5*(1/(gen+1)**.25)
-            print(mutation_rate)
-            off = mutate_offsprings(off, prob=mutation_rate, self_adapt_sigma=args.self_adapt_sigma)
+            # mutation_rate = 0.5*(1/(gen+1)**.25)
+            # print(mutation_rate)
+            off = mutate_offsprings(off, self_adapt_sigma=args.self_adapt_sigma)
             off_fitnesses = eval_population(off, FITNESS, ENEMIES, num_trials=TRIALS)
 
             # Replacement

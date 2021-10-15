@@ -9,7 +9,7 @@ def mutate_offsprings(offsprings, prob = 0.3, self_adapt_sigma=1):
     
     for offspring in offsprings:
         val = np.random.uniform()
-        if val <= 0.2:
+        if val <= prob:
             offspring = mutate_offspring(offspring, self_adapt_sigma)
     return offsprings
 

@@ -5,7 +5,7 @@ import numpy as np
 #     # Just add a smidge of random Gaussian noise.
 #     noise = np.random.normal(0, 1, offspring.shape)
 #     return offspring + noise
-def mutate_offsprings(offsprings, prob = 0.3, self_adapt_sigma=1):
+def mutate_offsprings(offsprings, prob = 0.2, self_adapt_sigma=1):
     
     for offspring in offsprings:
         val = np.random.uniform()

@@ -30,7 +30,7 @@ def eval_individual(genome, fitness_func, enemy):
                       contacthurt='player',
                       speed='fastest',
                       logs="off",
-                      randomini='yes',
+                      randomini='no',
                       level=2)
 
     # Run game with genome weights (exclude sigma).

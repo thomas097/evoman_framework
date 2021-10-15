@@ -34,8 +34,8 @@ if __name__ == "__main__":
     parser.add_argument('--hidden', help='hidden layer size of NN', default=10,type=int)
     parser.add_argument('--outputs', help='output size of NN', default=5,type=int)
     parser.add_argument('--crossover', help='crossover type (1: uniform, 2: singlepoint, 3: multipoint)', default=1,type=int)
-    parser.add_argument('--trials', help='number of trials', default=4,type=int)
-    parser.add_argument('--self_adapt_sigma', help="allow self adaption of noise sigma", default=1, type=int)
+    parser.add_argument('--trials', help='number of trials', default=1,type=int)
+    parser.add_argument('--self_adapt_sigma', help="allow self adaption of noise sigma", default=0, type=int)
     args = parser.parse_args()
 
     
@@ -81,7 +81,9 @@ if __name__ == "__main__":
             # Reproduction
             off = crossover_dict[CROSSOVER](par, NUM_OFFSPRING)
             # print(off.shape)
-            off = mutate_offsprings(off)
+            mutation_rate = 0.5*(1/(gen+1)**.25)
+            print(mutation_rate)
+            off = mutate_offsprings(off, prob=mutation_rate, self_adapt_sigma=args.self_adapt_sigma)
             off_fitnesses = eval_population(off, FITNESS, ENEMIES, num_trials=TRIALS)
 
             # Replacement

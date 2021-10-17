@@ -27,7 +27,7 @@ from environment import Environment
 if __name__ == "__main__":
 
     REPEATS = 5
-    FILENAME = "best_run-6_enemies-[2, 3, 4]_fitness-1.txt"
+    FILENAME = "solutions/best_run-6_enemies-[1, 5, 7]_fitness-1.txt"
 
     # Load weights from file.
     weights = np.loadtxt(FILENAME)

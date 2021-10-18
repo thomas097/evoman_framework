@@ -1,7 +1,7 @@
 """
-    Filename:    specialist_fitness_plots.py
+    Filename:    generalist_fitness_plots.py
     Author(s):   Thomas Bellucci, Svetlana Codrean
-    Assignment:  Task 1 - Evolutionary Computing
+    Assignment:  Task 2 - Evolutionary Computing
     Description: Creates the fitness curves for the final report
                  showing the mean and max fitness for the population
                  as a function of the generation. 
@@ -10,14 +10,15 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from glob import glob
 
 if __name__ == "__main__":
 
-    ENEMIES = [[1, 2, 3],
-               [1, 2, 3]] # Replace with new one
+    ENEMIES = [[1, 5, 7],
+               [2, 3, 4]]
     FITNESS_TYPES = [1, 2]
-    GENS = 20
-    RUNS = 5
+    GENS = 75
+    RUNS = 10
 
     for k, enemies in enumerate(ENEMIES):
 
@@ -29,7 +30,8 @@ if __name__ == "__main__":
         # Load in mean and max stats for each run.
         for run in range(RUNS):
             for fitness_type in FITNESS_TYPES:
-                filename = "stats_run-{}_enemies-{}_fitness-{}.csv".format(run, enemies, fitness_type)
+
+                filename = "stats/stats_run-{}_enemies-{}_fitness-{}.csv".format(run, enemies, fitness_type)
                 df = pd.read_csv(filename)
 
                 if fitness_type == 1:
@@ -77,7 +79,6 @@ if __name__ == "__main__":
 
     plt.show()
 
-        
     
 
 

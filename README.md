@@ -42,7 +42,8 @@ To facilitate easy collaboration, the algorithm itself was split over several fi
 * mutation.py				Implements mutation operators
 * parent_selection(2).py		Implements parent selection and fitness sharng
 * recombination.py			Implements crossover operators
-* survivor selection.py			Implements survivor selection operators'
+* survivor selection.py			Implements survivor selection operators
+* evaluation.py				Contains all code used to evaluate individuals.
 
 The final best solution is provided as 19.txt.
 

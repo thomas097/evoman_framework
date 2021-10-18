@@ -1,13 +1,10 @@
 
 """
-    Filename:    specialist_boxplots.py
+    Filename:    specialist_outcome_table.py
     Author(s):   Thomas Bellucci, Svetlana Codrean
-    Assignment:  Task 1 - Evolutionary Computing
-    Description: Creates the boxplots for the final report showing
-                 individual gain scores for the best found player
-                 in each run w.r.t the enemy. It also performs the
-                 Welch's t-test to determine the significance of
-                 the performance differences found between the algorithms.
+    Assignment:  Task 2 - Evolutionary Computing
+    Description: Creates the tabel showing the final energy level of
+                 the player and enemy for the best controller.
 """
 import sys, os
 sys.path.insert(0, 'evoman')
@@ -27,7 +24,7 @@ from environment import Environment
 if __name__ == "__main__":
 
     REPEATS = 5
-    FILENAME = "solutions/best_run-6_enemies-[1, 5, 7]_fitness-1.txt"
+    FILENAME = "19.txt"
 
     # Load weights from file.
     weights = np.loadtxt(FILENAME)

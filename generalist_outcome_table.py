@@ -10,12 +10,7 @@ import sys, os
 sys.path.insert(0, 'evoman')
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-import pickle
-import neat
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.stats import ttest_ind
 
 from evaluation import eval_population, eval_individual
 from demo_controller import player_controller
